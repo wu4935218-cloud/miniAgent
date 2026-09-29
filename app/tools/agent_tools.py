@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+import asyncio
 
 tools = []
 tool_registry = {}
@@ -58,12 +59,14 @@ def calculator(a:int,b:int) -> int:
     description="搜索关键词",
     args_model=SearchArgs
 )
-def search(query:str) -> str:
+async def search(query:str) -> str:
+    await asyncio.sleep(1)
     return f"搜到了关于{query}的资料"
 @tool(
     name="get_weather",
     description="查询天气",
     args_model=GetWeatherArgs
 )
-def get_weather(city:str) -> str:
+async def get_weather(city:str) -> str:
+    await asyncio.sleep(2)
     return f"{city}当前天气：晴，25℃"
