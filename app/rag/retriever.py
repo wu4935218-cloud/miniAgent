@@ -12,17 +12,28 @@ document_embedding = embed_texts(documents)
 
 def retrieve(
         query: str,
-        top_k: int = 3
-) -> list[str]:
+        top_k: int = 3,
+        min_score: float = 0.5
+) -> list[tuple[str, float]]:
     query_embeddings = embed_query(query)
     scores = document_embedding @ query_embeddings
     indices = np.argsort(scores)[::-1][:top_k]
-    return [
-        (
-            documents[index],
-            float(scores[index])
-        )
-        for index in indices
-    ]
+    results = []
+    for index in indices:
+        score = float(scores[index])
+        if score >= min_score:
+            results.append((documents[index], score))
+    return results
 
-# print(retrieve( "Agent 怎么调用外部功能？"))
+if __name__ == "__main__":
+    # print(retrieve( "Agent 怎么调用外部功能？"))
+    questions = [
+        "Agent 怎么使用外部工具？",
+        "Embedding 是什么？",
+        "北京今天气温是多少？"
+    ]
+    for question in questions:
+        print("\nquestion:",question)
+        results = retrieve(question,3,0.0)
+        for document,score in results:
+            print(f"{score:.4f} {document} ")

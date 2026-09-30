@@ -1,7 +1,4 @@
 import asyncio
-
-from prompt_toolkit import document
-
 from app.core.config import client
 from app.rag.retriever import retrieve
 
@@ -9,9 +6,11 @@ async def rag_answer(
         question: str
 ) -> str:
     result = await asyncio.to_thread(retrieve, question)
+    if not result:
+        return "当前知识库中没有足够信息。"
     context = "\n\n".join(
         document
-        for document,score in result
+        for document,_ in result
     )
     messages = [
         {
@@ -37,6 +36,8 @@ async def rag_answer(
         messages=messages
     )
     return response.choices[0].message.content or ""
-# print(asyncio.run(rag_answer("Agent 怎么使用外部工具？")))
-print(asyncio.run(rag_answer("什么是 Embedding？")))
-# print(asyncio.run(rag_answer("北京天气怎么样？")))
+
+if __name__ == "__main__":
+    # print(asyncio.run(rag_answer("Agent 怎么使用外部工具？")))
+    # print(asyncio.run(rag_answer("什么是 Embedding？")))
+    print(asyncio.run(rag_answer("北京天气怎么样？")))
