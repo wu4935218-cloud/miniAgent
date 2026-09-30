@@ -1,4 +1,4 @@
-from app.scheams.chat import ChatResponse,ChatRequest
+from app.schemas.chat import ChatResponse,ChatRequest
 from fastapi import APIRouter
 from app.services.agent_service import run_agent
 
