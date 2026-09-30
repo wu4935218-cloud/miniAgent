@@ -1,12 +1,18 @@
 import asyncio
+
+from prompt_toolkit import document
+
 from app.core.config import client
 from app.rag.retriever import retrieve
 
 async def rag_answer(
         question: str
 ) -> str:
-    chunks = await asyncio.to_thread(retrieve, question)
-    context = "\n\n".join(chunks)
+    result = await asyncio.to_thread(retrieve, question)
+    context = "\n\n".join(
+        document
+        for document,score in result
+    )
     messages = [
         {
             "role": "system",
@@ -31,6 +37,6 @@ async def rag_answer(
         messages=messages
     )
     return response.choices[0].message.content or ""
-print(asyncio.run(rag_answer("Agent 怎么使用外部工具？")))
-# print(asyncio.run(rag_answer("什么是 Embedding？")))
+# print(asyncio.run(rag_answer("Agent 怎么使用外部工具？")))
+print(asyncio.run(rag_answer("什么是 Embedding？")))
 # print(asyncio.run(rag_answer("北京天气怎么样？")))
