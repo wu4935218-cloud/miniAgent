@@ -1,0 +1,13 @@
+AI Agent 是能够感知环境、进行决策，并通过工具完成任务的人工智能系统。
+
+Tool Calling 是大模型调用外部工具的一种机制。模型本身不会直接执行 Python 函数，而是生成工具调用请求，由程序负责执行。
+
+RAG 全称 Retrieval-Augmented Generation，即检索增强生成。它会在回答问题前检索外部知识，并把相关内容作为上下文提供给大模型。
+
+Embedding 是把文本转换为稠密向量的技术。语义相似的文本通常在向量空间中距离更近。
+
+Agent Memory 用于保存与任务相关的历史信息，使 Agent 能够在多个步骤甚至多个会话中利用过去的信息。
+
+FastAPI 是一个 Python Web 框架，可以用于把 Agent 封装成 HTTP 服务。
+
+asyncio 是 Python 的异步编程框架，非常适合网络请求、数据库访问等 I/O 密集型场景。

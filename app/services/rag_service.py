@@ -5,12 +5,14 @@ from app.rag.retriever import retrieve
 async def rag_answer(
         question: str
 ) -> str:
-    result = await asyncio.to_thread(retrieve, question)
-    if not result:
+    results = await asyncio.to_thread(retrieve, question)
+    if not results:
         return "当前知识库中没有足够信息。"
     context = "\n\n".join(
-        document
-        for document,_ in result
+        f"[来源:{result.chunk.metadata['source']}"
+        f"Chunk:{result.chunk.metadata['chunk_index']}]"
+        f"{result.chunk.content}"
+        for result in results
     )
     messages = [
         {
