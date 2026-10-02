@@ -1,6 +1,4 @@
 import numpy as np
-from numpy.ma.core import indices
-
 from app.rag.embedding import embed_texts,embed_query
 from app.rag.models import DocumentChunk,SearchResult
 

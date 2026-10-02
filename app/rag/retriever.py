@@ -1,7 +1,4 @@
-import numpy as np
-from app.rag.embedding import embed_query,embed_texts
 from functools import lru_cache
-
 from app.rag.indexer import build_index
 from app.rag.models import SearchResult
 from app.rag.vector_store import SimpleVectorStore
