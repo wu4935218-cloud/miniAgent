@@ -10,7 +10,7 @@ router = APIRouter(
 
 @router.post(
     "/chat",
-    response_model=ChatResponse
+    response_model=ChatResponse# 定义模型返回给用户的格式
 )
 async def chat(request: ChatRequest) -> ChatResponse:
     answer = await run_agent(request.message)

@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 import asyncio
 
+from app.rag.retriever import retrieve
+
 tools = []
 tool_registry = {}
 def tool(
@@ -46,6 +48,33 @@ class GetWeatherArgs(BaseModel):
     city:str = Field(
         min_length=1,
         description="要查询天气的城市名称"
+    )
+class KnowledgeSearchArgs(BaseModel):
+    query: str = Field(
+        min_length=1,
+        max_length=500,
+        description="要在内部知识库中检索的问题或关键词"
+    )
+@tool(
+    name="search_knowledge_base",
+    description=(
+        "搜索内部知识库。"
+        "当用户询问 Agent、RAG、Embedding、"
+        "Tool Calling、Memory 等内部知识时使用。"
+    ),
+    args_model=KnowledgeSearchArgs
+)
+async def search_knowledge_base(query: str) -> str:
+    results = await asyncio.to_thread(retrieve,query)
+    if not results:
+        return "知识库中没有找到足够相关的信息。"
+    return "\n\n".join(
+        (
+            f"[来源：{result.chunk.metadata['source']},"
+            f"Chunk:{result.chunk.metadata['chunk_index']}]\n"
+            f"{result.chunk.content}"
+        )
+        for result in results
     )
 @tool(
     name="calculator",
