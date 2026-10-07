@@ -11,7 +11,7 @@ def get_vector_store() -> SimpleVectorStore:
 def retrieve(
         query: str,
         top_k: int = 3,
-        min_score: float = 0.5
+        min_score: float = 0.55
 ) -> list[SearchResult]:
     store = get_vector_store()
     return store.search(query, top_k, min_score)

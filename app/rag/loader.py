@@ -6,6 +6,14 @@ def load_text_file(file_path: str | Path) -> str:
     path = Path(file_path)
     return path.read_text(encoding="utf-8")
 
+def load_all_documents(data_dir: Path):
+    all_chunks = []
+    for file_path in data_dir.glob("*.txt"):
+        if file_path.is_file():
+            chunks = load_and_split(file_path,chunk_size=200,chunk_overlap=40)
+            all_chunks.extend(chunks)
+    return all_chunks
+
 def load_and_split(
         file_path: str | Path,
         chunk_size: int = 200,

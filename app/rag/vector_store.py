@@ -29,7 +29,7 @@ class SimpleVectorStore:
         if self.embedding is None:
             return []
         query_embedding = embed_query(query)
-        scores = self.embedding @ query_embedding
+        scores = self.embedding @ query_embedding#余弦相似度越大越好
         indices = np.argsort(scores)[::-1][:top_k]
         results = []
         for index in indices:

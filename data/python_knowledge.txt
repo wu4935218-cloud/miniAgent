@@ -1,0 +1,7 @@
+Python 的 async def 用于定义协程函数。
+
+await 用于等待异步操作，并把执行权交回事件循环。
+
+asyncio.gather 可以并发等待多个协程完成。
+
+对于阻塞的同步函数，可以使用 asyncio.to_thread 在线程中执行。
