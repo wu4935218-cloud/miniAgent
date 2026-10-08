@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 import asyncio
 
-from app.rag.retriever import retrieve
+from app.rag.vector_retriever import retrieve
 
 tools = []
 tool_registry = {}

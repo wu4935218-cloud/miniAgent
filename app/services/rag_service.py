@@ -1,6 +1,6 @@
 import asyncio
 from app.core.config import client
-from app.rag.retriever import retrieve
+from app.rag.vector_retriever import retrieve
 
 async def rag_answer(
         question: str

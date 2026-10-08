@@ -1,4 +1,4 @@
-from app.rag.retriever import retrieve
+from app.rag.vector_retriever import retrieve
 
 test_cases = [
     {
