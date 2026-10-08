@@ -1,8 +1,6 @@
 from pathlib import Path
-
 import chromadb
 from app.rag.embedding import embed_query,embed_texts
-from app.rag.loader import load_all_documents
 from app.rag.models import DocumentChunk, SearchResult
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -71,9 +69,9 @@ class ChromaVectorStore:
 if __name__ == "__main__":
     chromaStore = ChromaVectorStore()
     queries = [
-        "asyncio.gather 有什么作用？",
-        "RAG 是什么？",
-        "姚明多高？"
+        "Tool Calling 是怎么调用 Python 函数的？",
+        "asyncio 为什么适合 Agent 后端？",
+        "RAG 如何增强模型回答？"
     ]
 
     for query in queries:

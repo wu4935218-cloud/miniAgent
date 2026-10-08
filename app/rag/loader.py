@@ -1,5 +1,5 @@
 from pathlib import Path
-from app.rag.chunker import split_text
+from app.rag.chunker import split_text, recursive_split_text
 from app.rag.models import DocumentChunk
 
 def load_text_file(file_path: str | Path) -> str:
@@ -21,13 +21,15 @@ def load_and_split(
 ) -> list[DocumentChunk]:
     path = Path(file_path)
     text = load_text_file(path)
-    texts = split_text(text, chunk_size, chunk_overlap)
+    # texts = split_text(text, chunk_size, chunk_overlap)# 按字符切分
+    texts = recursive_split_text(text, chunk_size, None)# 按段落切分
     return [
         DocumentChunk(
             content=chunk,
             metadata={
                 "source":path.name,
-                "chunk_index":index
+                "chunk_index":index,
+                "char_count":len(chunk)
             }
         )
         for index,chunk in enumerate(texts)
