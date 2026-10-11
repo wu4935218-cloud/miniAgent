@@ -1,42 +1,124 @@
-from app.rag.vector_retriever import retrieve
-
+from app.rag.models import SearchResult
+from app.rag.vector_retriever import vector_retrieve
+from app.rag.rerank_retrieve import rerank_retrieve
+from app.rag.hybrid_retriever import hybrid_retrieve
 test_cases = [
     {
         "query": "asyncio.gather 有什么作用？",
-        "expected_source": "python_knowledge.txt"
+        "expected_source": "python_knowledge.txt",
+        "expected_chunk_index": 0
     },
     {
-        "query": "RAG 是什么？",
-        "expected_source": "agent_knowledge.txt"
+        "query": "RAG 如何利用外部知识？",
+        "expected_source": "agent_knowledge.txt",
+        "expected_chunk_index": 0
     },
     {
-        "query": "Tool Calling 是什么？",
-        "expected_source": "agent_knowledge.txt"
+        "query": "Agent 为什么适合处理 I/O 请求？",
+        "expected_source": "agent_knowledge.txt",
+        "expected_chunk_index": 2
     }
 ]
+def is_excepted(
+        result: SearchResult,
+        excepted_source: str,
+        excepted_chunk_index: int
+) -> bool:
+    metadata = result.chunk.metadata
+    return (
+        metadata["source"] == excepted_source
+        and metadata["chunk_index"] == excepted_chunk_index
+    )
+
+def hit_at_k(
+        results:list[SearchResult],
+        excepted_source: str,
+        excepted_chunk_index: int,
+        k:int
+) -> bool:
+    top_k_results = results[:k]
+    return any(
+        is_excepted(
+            result,
+            excepted_source,
+            excepted_chunk_index
+        )
+        for result in top_k_results
+    )
+
+def find_rank(
+        results:list[SearchResult],
+        excepted_source:str,
+        excepted_chunk_index:int
+) -> int | None:
+    for rank,result in enumerate(results,start=1):
+        if is_excepted(
+            result,excepted_source,excepted_chunk_index
+        ):
+            return rank
+    return None
+
 
 def evaluate() -> None:
-    hit = 0
+    hybrid_hit_1 = 0
+    hybrid_hit_3 = 0
+    rerank_hit_1 = 0
+    rerank_hit_3 = 0
+    total = len(test_cases)
     for case in test_cases:
-        results = retrieve(
-            case["query"],
-            top_k=1,
-            min_score=0.0
+        query = case["query"]
+        expected_source = case["expected_source"]
+        expected_chunk_index = case["expected_chunk_index"]
+        hybrid_results = hybrid_retrieve(query, top_k=10)
+        rerank_results = rerank_retrieve(query, top_k=3)
+        hybrid_rank = find_rank(
+            hybrid_results,
+            expected_source,
+            expected_chunk_index
         )
-        if not results:
-            print("MISS:",case["query"])
-            continue
-        actual_source = (
-            results[0].chunk.metadata["source"]
+        rerank_rank = find_rank(
+            rerank_results,
+            expected_source,
+            expected_chunk_index
         )
-        success = (
-            actual_source == case["expected_source"]
-        )
-        if success:
-            hit += 1
-        print(case["query"],"→",actual_source,"√" if success else "×")
-    accuracy = hit / len(test_cases)
-    print(f"Top-1 Accuracy:{accuracy:.2%}")
+        if hit_at_k(
+            hybrid_results,
+            expected_source,
+            expected_chunk_index,
+            1
+        ):
+            hybrid_hit_1 += 1
+        if hit_at_k(
+            hybrid_results,
+            expected_source,
+            expected_chunk_index,
+            3
+        ):
+            hybrid_hit_3 += 1
+        if hit_at_k(
+            rerank_results,
+            expected_source,
+            expected_chunk_index,
+            1
+        ):
+            rerank_hit_1 += 1
+        if hit_at_k(
+            rerank_results,
+            expected_source,
+            expected_chunk_index,
+            3
+        ):
+            rerank_hit_3 += 1
+        print(f"\n====={query}=====")
+        print("Expected:",expected_source,expected_chunk_index)
+        print("Hybrid Rank:",hybrid_rank)
+        print("Rerank Rank:",rerank_rank)
+    print("\n======Eval Result=====")
+    print(f"Hybrid Hit@1:{hybrid_hit_1/total:.2%}")
+    print(f"Hybrid Hit@3:{hybrid_hit_3/total:.2%}")
+    print(f"Rerank Hit@1:{rerank_hit_1/total:.2%}")
+    print(f"Rerank Hit@3:{rerank_hit_3/total:.2%}")
+
 
 if __name__ == "__main__":
     evaluate()
