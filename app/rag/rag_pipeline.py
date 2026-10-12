@@ -3,8 +3,8 @@ from app.rag.models import SearchResult
 from app.rag.vector_retriever import vector_retrieve
 from app.rag.contextual_query_rewriter import ChatMessage
 from app.rag.conversation_retriever import conversation_retrieve
-
-
+from app.core.config import client
+import asyncio
 class RAGPipelineResult(BaseModel):
     original_question: str
     standalone_query: str
@@ -46,7 +46,7 @@ async def run_rag(
         history=history,
         top_k=top_k
     )
-    has_evidence = has_sufficient_evidence(retrieval_result.standalone_query)
+    has_evidence = await asyncio.to_thread(has_sufficient_evidence, retrieval_result.standalone_query)
     if not has_evidence:
         return RAGPipelineResult(
             original_question=question,
@@ -65,6 +65,39 @@ async def run_rag(
         context=context,
         has_evidence=True
     )
+
+async def answer_with_rag(
+        question: str,
+        history: list[ChatMessage]
+) -> str:
+    rag_result = await run_rag(question, history)
+    if not rag_result.has_evidence:
+        return "当前知识库中没有足够信息。"
+    response = await client.chat.completions.create(
+        model="deepseek-flash",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "你是一个知识库问答助手。"
+                    "必须严格根据提供的知识库上下文回答。"
+                    "不要使用上下文之外的事实。"
+                    "如果上下文无法支持某个结论，"
+                    "不要自行编造。"
+                )
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"知识库上下文：\n"
+                    f"{rag_result.context}\n\n"
+                    f"用户问题：\n"
+                    f"{question}"
+                )
+            }
+        ]
+    )
+    return response.choices[0].message.content or ""
 
 if __name__ == "__main__":
     import asyncio
