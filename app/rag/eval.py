@@ -19,41 +19,41 @@ test_cases = [
         "expected_chunk_index": 2
     }
 ]
-def is_excepted(
+def is_expected(
         result: SearchResult,
-        excepted_source: str,
-        excepted_chunk_index: int
+        expected_source: str,
+        expected_chunk_index: int
 ) -> bool:
     metadata = result.chunk.metadata
     return (
-        metadata["source"] == excepted_source
-        and metadata["chunk_index"] == excepted_chunk_index
+        metadata["source"] == expected_source
+        and metadata["chunk_index"] == expected_chunk_index
     )
 
 def hit_at_k(
         results:list[SearchResult],
-        excepted_source: str,
-        excepted_chunk_index: int,
+        expected_source: str,
+        expected_chunk_index: int,
         k:int
 ) -> bool:
     top_k_results = results[:k]
     return any(
-        is_excepted(
+        is_expected(
             result,
-            excepted_source,
-            excepted_chunk_index
+            expected_source,
+            expected_chunk_index
         )
         for result in top_k_results
     )
 
 def find_rank(
         results:list[SearchResult],
-        excepted_source:str,
-        excepted_chunk_index:int
+        expected_source:str,
+        expected_chunk_index:int
 ) -> int | None:
     for rank,result in enumerate(results,start=1):
-        if is_excepted(
-            result,excepted_source,excepted_chunk_index
+        if is_expected(
+            result,expected_source,expected_chunk_index
         ):
             return rank
     return None
