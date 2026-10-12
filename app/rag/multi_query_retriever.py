@@ -51,7 +51,9 @@ def print_results(title:str,results:list[SearchResult]) -> None:
 
 if __name__ == "__main__":
     queries = [
-        "模型不知道外部资料的时候怎么办？"
+        "Agent 用异步到底好在哪？",
+        "模型不知道外部资料的时候怎么办？",
+        "智能体怎么使用程序里的功能？"
     ]
     async def main():
         for query in queries:
@@ -63,19 +65,12 @@ if __name__ == "__main__":
                 print(f"{index},{rewritten_query}")
             hybrid_results = hybrid_retrieve(query=query,top_k=3)
             print_results("hybrid original top3",hybrid_results)
-            multi_query_results = (
-                await multi_query_retrieve(
-                    query=query,
-                    top_k=3,
-                    queries=generates_queries
-                )
-            )
-            print_results("multi-query top3",multi_query_results)
             candidates = await multi_query_retrieve(
                 query=query,
                 top_k=10,
                 queries=generates_queries
             )
+            print_results("multi-query top3", candidates[:3])
             reranker = get_reranker()
             reranker_results = await asyncio.to_thread(
                 reranker.rerank,
